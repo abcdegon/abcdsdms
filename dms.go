@@ -15,18 +15,18 @@
 /*                                                                            */
 /* Author: abcddev@yahoo.com                                                  */
 /*                                                                            */
-/* Version: 0.0.0-02                                                          */
+/* Version: 0.0.0-03                                                          */
 /*                                                                            */
 /* Revision: 0 - initialize the source code files.                            */
-/*           1 - added comments and finished checkCmdLineArgs                 */
+/*           1 - added comments and finished checkCmdLineArgs()               */
 /*           2 - edited checkCmdLineArgs to adopt logging format              */
+/*           3 - added comments and finished dmsLog()                         */
 /******************************************************************************/
 package main
 
 // imports
 import (
 	"errors"
-	"fmt"
 	"os"
 
 	log "github.com/sirupsen/logrus"
@@ -195,8 +195,6 @@ func main() {
 	}
 
 	dmsLog(logf, 7, "AbcdsDMS-7-700001", "AbcdsDMS", "main")
-
-	fmt.Printf("%s %s %s %s", filing, index, storage, logfn)
 	/* Nassi Shneiderman Diagram
 		 **************************************
 		 *****  Commandline Arguments ok? *****
@@ -206,7 +204,7 @@ func main() {
 		 ***************************|        **
 	     ** list all files in -f    |        **
 		 ***************************|        **
-		 ** For alle file           |        **
+		 ** For all files           |        **
 		 **   **********************|        **
 		 **   **   filename ok?   **|        **
 		 **   **  true  |  false  **|        **
