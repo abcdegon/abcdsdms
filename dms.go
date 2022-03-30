@@ -40,7 +40,7 @@ const ()
 /*                                                                            */
 /* [X] create a log format                                                    */
 /*     [X] adopt logging in checkCmdLineArgs()                                */
-/*     [ ] adopt logging in main()                                            */
+/*     [X] adopt logging in main()                                            */
 /* [ ] read filing directory                                                  */
 /******************************************************************************/
 
@@ -98,6 +98,12 @@ func checkCmdLineArgs(args []string) (fi, in, lf, st string, err error) {
 }
 
 func dmsLog(file *os.File, level int, id string, tid string, src string) {
+	/*************************************************************************/
+	/* Local variables                                                       */
+	/*      msgs - map[string]string - map of all the log messages           */
+	/*    fields - log.Fields        - fields to be logged                   */
+	/*        sl - log.Level         - the syslog level                      */
+	/*************************************************************************/
 	var msgs = map[string]string{
 		"AbcdsDMS-1-100001": "Missing command line argument -f",
 		"AbcdsDMS-1-100002": "Missing command line argument -i",
@@ -105,45 +111,52 @@ func dmsLog(file *os.File, level int, id string, tid string, src string) {
 		"AbcdsDMS-1-100004": "Missing command line argument -s",
 		"AbcdsDMS-2-200001": "Error with your logfile, set file to STDOUT",
 		"AbcdsDMS-7-700001": "Abcdsdms started"}
-
 	var fields = log.Fields{}
 	var sl = log.FatalLevel
 
+	/**************************************************************************/
+	/* Set the fields which will be logged. Their values are given by the     */
+	/* function parameters.                                                   */
+	/**************************************************************************/
 	fields["prio"] = level
 	fields["id"] = id
 	fields["transaction"] = tid
 	fields["src"] = src
 
+	/**************************************************************************/
+	/* This switch command is used to set the syslog level of the upcoming    */
+	/* message. It is important because that's how the syslog level is logged */
+	/* itself.                                                                */
+	/**************************************************************************/
 	switch level {
 	case 1:
-		fmt.Println("***** 1")
 		sl = log.PanicLevel
 	case 2:
-		fmt.Println("***** 2")
 		sl = log.FatalLevel
 	case 3:
-		fmt.Println("***** 3")
 		sl = log.ErrorLevel
 	case 4:
-		fmt.Println("***** 4")
 		sl = log.WarnLevel
 	case 5, 6:
-		fmt.Println("***** 5,6")
 		sl = log.InfoLevel
 	case 7:
-		fmt.Println("***** 7")
 		sl = log.DebugLevel
 	}
 
+	// If there is no log file opened I will send messages to STDOUT.
 	if file == nil {
 		file = os.Stdout
 	}
 
+	/**************************************************************************/
+	/* The following command generate the log message that will be written    */
+	/* either to STDOUT or to file. The syslog will be written in JSON which  */
+	/* to use log analysis tools like Splunk>, Graylog, etc.                  */
+	/**************************************************************************/
 	log.SetOutput(file)
 	log.SetFormatter(&log.JSONFormatter{})
 	log.SetLevel(sl)
 	log.WithFields(fields).Log(sl, msgs[id])
-
 }
 
 func main() {
