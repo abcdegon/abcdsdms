@@ -177,7 +177,7 @@ func main() {
 	/**************************************************************************/
 	logf, err = os.OpenFile(logfn, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
-		dmsLog(os.Stdout, 2, "AbcdsDMS-2-200001", "main")
+		dmsLog(os.Stdout, 2, "AbcdsDMS-2-200001", "AbcdsDMS", "main")
 		logf = os.Stdout
 	}
 
