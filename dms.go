@@ -21,13 +21,16 @@
 /*           1 - added comments and finished checkCmdLineArgs()               */
 /*           2 - edited checkCmdLineArgs to adopt logging format              */
 /*           3 - added comments and finished dmsLog()                         */
+/*           4 - changed dmsLog() to be more flexible                         */
 /******************************************************************************/
 package main
 
 // imports
 import (
 	"errors"
+	"fmt"
 	"os"
+	"strconv"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -41,6 +44,7 @@ const ()
 /* [X] create a log format                                                    */
 /*     [X] adopt logging in checkCmdLineArgs()                                */
 /*     [X] adopt logging in main()                                            */
+/*     [X] create a format for the transaction id                             */
 /* [ ] read filing directory                                                  */
 /******************************************************************************/
 
@@ -79,16 +83,16 @@ func checkCmdLineArgs(args []string) (fi, in, lf, st string, err error) {
 
 	// Check if all the necessary parameters are set or set error code.
 	if fi == "" {
-		err = errors.New("AbcdsDMS-1-100001")
+		err = errors.New("100001")
 	} else {
 		if in == "" {
-			err = errors.New("AbcdsDMS-1-100002")
+			err = errors.New("100002")
 		} else {
 			if lf == "" {
-				err = errors.New("AbcdsDMS-1-100003")
+				err = errors.New("100003")
 			} else {
 				if st == "" {
-					err = errors.New("AbcdsDMS-1-100004")
+					err = errors.New("100004")
 				}
 			}
 		}
@@ -97,29 +101,29 @@ func checkCmdLineArgs(args []string) (fi, in, lf, st string, err error) {
 	return
 }
 
-func dmsLog(file *os.File, level int, id string, tid string, src string) {
+func dmsLog(file *os.File, id int, tid string, src string) {
 	/*************************************************************************/
 	/* Local variables                                                       */
 	/*      msgs - map[string]string - map of all the log messages           */
 	/*    fields - log.Fields        - fields to be logged                   */
 	/*        sl - log.Level         - the syslog level                      */
 	/*************************************************************************/
-	var msgs = map[string]string{
-		"AbcdsDMS-1-100001": "Missing command line argument -f",
-		"AbcdsDMS-1-100002": "Missing command line argument -i",
-		"AbcdsDMS-1-100003": "Missing command line argument -l",
-		"AbcdsDMS-1-100004": "Missing command line argument -s",
-		"AbcdsDMS-2-200001": "Error with your logfile, set file to STDOUT",
-		"AbcdsDMS-7-700001": "Abcdsdms started"}
+	var msgs = map[int]string{
+		100001: "Missing command line argument -f",
+		100002: "Missing command line argument -i",
+		100003: "Missing command line argument -l",
+		100004: "Missing command line argument -s",
+		200001: "Error with your logfile, set file to STDOUT",
+		700001: "Abcdsdms started"}
 	var fields = log.Fields{}
 	var sl = log.FatalLevel
+	var level = id / 100000
 
 	/**************************************************************************/
 	/* Set the fields which will be logged. Their values are given by the     */
 	/* function parameters.                                                   */
 	/**************************************************************************/
-	fields["prio"] = level
-	fields["id"] = id
+	fields["id"] = fmt.Sprintf("%s-%d-%d", "AbcdsDMS", level, id)
 	fields["transaction"] = tid
 	fields["src"] = src
 
@@ -172,14 +176,17 @@ func main() {
 	var filing, index, logfn, storage string
 	var err error
 	var logf *os.File
+	var id int
 
 	/**************************************************************************/
 	/* Parse the commandline arguments. If any error occurs write a syslog    */
 	/* message of level fatal and exit the program.                           */
 	/**************************************************************************/
 	filing, index, logfn, storage, err = checkCmdLineArgs(os.Args)
+
 	if err != nil {
-		dmsLog(os.Stdout, 1, err.Error(), "AbcdsDMS", "main")
+		id, _ = strconv.Atoi(err.Error())
+		dmsLog(os.Stdout, id, "AbcdsDMS", "main")
 	}
 
 	/**************************************************************************/
@@ -190,11 +197,14 @@ func main() {
 	/**************************************************************************/
 	logf, err = os.OpenFile(logfn, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
-		dmsLog(os.Stdout, 2, "AbcdsDMS-2-200001", "AbcdsDMS", "main")
+		dmsLog(os.Stdout, 200001, "AbcdsDMS", "main")
 		logf = os.Stdout
 	}
 
-	dmsLog(logf, 7, "AbcdsDMS-7-700001", "AbcdsDMS", "main")
+	dmsLog(logf, 700001, "AbcdsDMS", "main")
+	fmt.Println(filing, index, logfn, storage)
+	// get a list of all files in -f
+
 	/* Nassi Shneiderman Diagram
 		 **************************************
 		 *****  Commandline Arguments ok? *****
