@@ -15,7 +15,7 @@
 /*                                                                            */
 /* Author: abcddev@yahoo.com                                                  */
 /*                                                                            */
-/* Version: 0.0.0-03                                                          */
+/* Version: 0.0.0-4                                                           */
 /*                                                                            */
 /* Revision: 0 - initialize the source code files.                            */
 /*           1 - added comments and finished checkCmdLineArgs()               */
@@ -44,7 +44,7 @@ const ()
 /* [X] create a log format                                                    */
 /*     [X] adopt logging in checkCmdLineArgs()                                */
 /*     [X] adopt logging in main()                                            */
-/*     [X] create a format for the transaction id                             */
+/*     [ ] create a format for the transaction id                             */
 /* [ ] read filing directory                                                  */
 /******************************************************************************/
 
@@ -186,7 +186,7 @@ func main() {
 
 	if err != nil {
 		id, _ = strconv.Atoi(err.Error())
-		dmsLog(os.Stdout, id, "AbcdsDMS", "main")
+		dmsLog(os.Stdout, id, "0", "main")
 	}
 
 	/**************************************************************************/
@@ -197,11 +197,11 @@ func main() {
 	/**************************************************************************/
 	logf, err = os.OpenFile(logfn, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
-		dmsLog(os.Stdout, 200001, "AbcdsDMS", "main")
+		dmsLog(os.Stdout, 200001, "0", "main")
 		logf = os.Stdout
 	}
 
-	dmsLog(logf, 700001, "AbcdsDMS", "main")
+	dmsLog(logf, 700001, "0", "main")
 	fmt.Println(filing, index, logfn, storage)
 	// get a list of all files in -f
 
